@@ -48,6 +48,7 @@ function Register() {
             className="cs-input"
             type="text"
             placeholder="Username"
+            autoComplete="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
@@ -57,6 +58,7 @@ function Register() {
             className="cs-input"
             type="email"
             placeholder="Email"
+            autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -66,6 +68,7 @@ function Register() {
             className="cs-input"
             type="password"
             placeholder="Password"
+            autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required

@@ -188,19 +188,24 @@ function Dashboard() {
         onDragOver={handleDragOver}
       >
         <div className="upload-field">
-          <input
-            type="file"
-            onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-          />
+          <label htmlFor="dashboard-file-input" className="cs-btn cs-btn-secondary upload-choose-button">
+            Choose file
+            <input
+              id="dashboard-file-input"
+              type="file"
+              onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+            />
+          </label>
+
           <span className="file-name">
-            {selectedFile ? selectedFile.name : "Drop a file here or choose"}
+            {selectedFile ? selectedFile.name : "No file chosen"}
           </span>
         </div>
 
         <div className="upload-actions">
           <button
             type="button"
-            className="button primary"
+            className="cs-btn cs-btn-primary"
             onClick={handleUpload}
             disabled={uploading}
           >
@@ -251,20 +256,20 @@ function Dashboard() {
                     href={fileUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="action-button secondary"
+                    className="cs-btn cs-btn-secondary"
                   >
                     Open
                   </a>
                   <a
                     href={fileUrl}
                     download={file.filename}
-                    className="action-button secondary"
+                    className="cs-btn cs-btn-secondary"
                   >
                     Download
                   </a>
                   <button
                     type="button"
-                    className="action-button danger"
+                    className="cs-btn cs-btn-danger"
                     onClick={() => handleDelete(file)}
                     disabled={deletingId === file.id}
                   >
