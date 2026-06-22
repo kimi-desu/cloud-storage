@@ -122,19 +122,18 @@ router.get(
             }
 
             // 3. Tentukan path file di storage backend
-            const filePath = path.join(__dirname, "..", file.filepath);
+            const filePath = path.join(process.cwd(), file.filepath);
 
-            // 4. Kirim file sebagai download (menggunakan nama asli file tersebut)
             res.download(filePath, file.filename, (err) => {
-                if (err) {
-                    console.error("Download error:", err);
-                    if (!res.headersSent) {
-                        return res.status(500).json({ 
-                            error: "Could not download the file" 
-                        });
+                    if (err) {
+                        console.error("Download error detail:", err); 
+                        if (!res.headersSent) {
+                            return res.status(500).json({ 
+                                error: "Could not download the file" 
+                            });
+                        }
                     }
-                }
-            });
+                });
 
         } catch (err) {
             console.error(err);
