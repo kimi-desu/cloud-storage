@@ -109,7 +109,7 @@ button, input, textarea, select {
 }
 
 .cs-btn-secondary {
-  background: transparent;
+  background: var(--cs-card); /* was: transparent */
   color: var(--cs-text);
   border-color: var(--cs-border);
 }
