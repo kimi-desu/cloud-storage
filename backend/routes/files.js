@@ -122,7 +122,8 @@ router.get(
             }
 
             // 3. Tentukan path file di storage backend
-            const filePath = path.join(process.cwd(), file.filepath);
+            const normalizedPath = file.filepath.replace(/\\/g, "/");
+            const filePath = path.join(process.cwd(), normalizedPath);
 
             res.download(filePath, file.filename, (err) => {
                     if (err) {
