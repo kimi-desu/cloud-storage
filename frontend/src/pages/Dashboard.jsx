@@ -72,6 +72,7 @@ function Dashboard() {
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [downloadingId, setDownloadingId] = useState(null); // State baru untuk loading download
   const [statusMessage, setStatusMessage] = useState("");
   const [statusType, setStatusType] = useState("");
 
@@ -124,6 +125,39 @@ function Dashboard() {
       alert("Upload failed");
     } finally {
       setUploading(false);
+    }
+  };
+
+  // FUNGSI BARU UNTUK HANDLE DOWNLOAD SECARA AMAN
+  const handleDownload = async (fileId, filename) => {
+    setDownloadingId(fileId);
+    try {
+      const token = localStorage.getItem("token");
+      
+      // Ambil file dari endpoint download baru via axios (api) dengan responseType 'blob'
+      const response = await api.get(`/files/download/${fileId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        responseType: "blob", 
+      });
+
+      // Membuat URL temporary dari binary blob
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", filename); // Memaksa download dengan nama asli
+      document.body.appendChild(link);
+      link.click();
+      
+      // Bersihkan dokumen HTML dan memory
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Download failed:", err);
+      alert("Could not download the file.");
+    } finally {
+      setDownloadingId(null);
     }
   };
 
@@ -260,13 +294,17 @@ function Dashboard() {
                   >
                     Open
                   </a>
-                  <a
-                    href={fileUrl}
-                    download={file.filename}
+                  
+                  {/* TOMBOL DOWNLOAD SUDAH DIUBAH DI SINI */}
+                  <button
+                    type="button"
                     className="cs-btn cs-btn-secondary"
+                    onClick={() => handleDownload(file.id, file.filename)}
+                    disabled={downloadingId === file.id}
                   >
-                    Download
-                  </a>
+                    {downloadingId === file.id ? "Downloading..." : "Download"}
+                  </button>
+
                   <button
                     type="button"
                     className="cs-btn cs-btn-danger"
