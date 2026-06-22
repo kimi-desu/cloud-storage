@@ -1,7 +1,8 @@
 import axios from "axios";
+import { API_URL } from "./config";
 
 const api = axios.create({
-  baseURL: "https://cloud-storage-production-3a8a.up.railway.app",
+  baseURL: API_URL,
 });
 
 export default api;

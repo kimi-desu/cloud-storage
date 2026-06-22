@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
+import { API_URL } from "../config";
+import Header from "../components/Header";
+import "../styles/modern.css";
 import "./Dashboard.css";
 
 const fileTypeIcons = {
@@ -59,7 +62,7 @@ const formatDate = (value) => {
 };
 
 const normalizeFileUrl = (filepath) => {
-  return `http://localhost:3000/${filepath.replace(/\\/g, "/")}`;
+  return `${API_URL}/${filepath.replace(/\\/g, "/")}`;
 };
 
 function Dashboard() {
@@ -124,6 +127,16 @@ function Dashboard() {
     }
   };
 
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const f = e.dataTransfer?.files?.[0];
+    if (f) setSelectedFile(f);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
   const handleDelete = async (file) => {
     if (!window.confirm(`Delete ${file.filename}?`)) {
       return;
@@ -161,21 +174,7 @@ function Dashboard() {
 
   return (
     <div className="dashboard-page">
-      <header className="dashboard-header">
-        <div>
-          <h1 className="dashboard-title">Cloud Storage</h1>
-          <p className="dashboard-description">
-            Upload, manage, and open your files with a clean, modern cloud storage interface.
-          </p>
-        </div>
-        <button
-          type="button"
-          className="button secondary"
-          onClick={handleLogout}
-        >
-          Logout
-        </button>
-      </header>
+      <Header title="Cloud Storage" onLogout={handleLogout} />
 
       {statusMessage && (
         <div className={`status-message ${statusType}`}>
@@ -183,14 +182,18 @@ function Dashboard() {
         </div>
       )}
 
-      <section className="upload-panel">
+      <section
+        className="upload-panel"
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+      >
         <div className="upload-field">
           <input
             type="file"
             onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
           />
           <span className="file-name">
-            {selectedFile ? selectedFile.name : "No file selected"}
+            {selectedFile ? selectedFile.name : "Drop a file here or choose"}
           </span>
         </div>
 
@@ -220,10 +223,18 @@ function Dashboard() {
             const icon = fileTypeIcons[extension] || "📁";
             const fileUrl = normalizeFileUrl(file.filepath);
 
+            const isImage = ["png", "jpg", "jpeg", "webp", "gif"].includes(extension);
+
             return (
               <article key={file.id} className="file-card">
                 <div className="file-card-header">
-                  <div className="file-icon">{icon}</div>
+                  <div className="file-icon">
+                    {isImage ? (
+                      <img src={fileUrl} alt={file.filename} />
+                    ) : (
+                      icon
+                    )}
+                  </div>
                   <div className="file-details">
                     <p className="file-name">{file.filename}</p>
                     <p className="file-type">{extension.toUpperCase()} file</p>

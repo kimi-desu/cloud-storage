@@ -1,15 +1,20 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../api";
+import "../styles/modern.css";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
 
     try {
       const res = await api.post("/auth/login", {
@@ -17,56 +22,53 @@ function Login() {
         password,
       });
 
-      localStorage.setItem(
-        "token",
-        res.data.token
-      );
-
-      alert("Login successful");
-
+      localStorage.setItem("token", res.data.token);
       navigate("/dashboard");
-
     } catch (err) {
-      alert(
-        err.response?.data?.error ||
-        "Login failed"
-      );
+      setError(err.response?.data?.error || "Login failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div>
-      <h1>Login</h1>
+    <div className="cs-auth-wrap">
+      <div className="cs-auth-card">
+        <div className="cs-auth-header">
+          <div className="cs-auth-title">Welcome back</div>
+          <div className="cs-auth-sub">Sign in to your account</div>
+        </div>
 
-      <form onSubmit={handleLogin}>
+        {error && <div className="cs-error">{error}</div>}
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) =>
-            setEmail(e.target.value)
-          }
-        />
+        <form className="cs-form" onSubmit={handleLogin}>
+          <input
+            className="cs-input"
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
 
-        <br /><br />
+          <input
+            className="cs-input"
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) =>
-            setPassword(e.target.value)
-          }
-        />
+          <div className="cs-actions">
+            <button className="cs-btn cs-btn-primary" type="submit" disabled={loading}>
+              {loading ? "Signing in..." : "Login"}
+            </button>
 
-        <br /><br />
-
-        <button type="submit">
-          Login
-        </button>
-
-      </form>
+            <Link to="/register" className="cs-link">Register</Link>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
