@@ -11,16 +11,11 @@ const router = express.Router();
 
 // MULTER STORAGE CONFIG
 const storage = multer.diskStorage({
-
     destination: function (req, file, cb) {
         cb(null, "uploads/");
     },
-
     filename: function (req, file, cb) {
-
-        const uniqueName =
-            Date.now() + path.extname(file.originalname);
-
+        const uniqueName = Date.now() + path.extname(file.originalname);
         cb(null, uniqueName);
     }
 });
@@ -33,11 +28,8 @@ router.post(
     "/upload",
     authMiddleware,
     upload.single("file"),
-
     async (req, res) => {
-
         try {
-
             const file = req.file;
 
             if (!file) {
@@ -66,9 +58,7 @@ router.post(
             });
 
         } catch (err) {
-
             console.error(err);
-
             res.status(500).json({
                 error: "Server error"
             });
@@ -81,11 +71,8 @@ router.post(
 router.get(
     "/my-files",
     authMiddleware,
-
     async (req, res) => {
-
         try {
-
             const result = await pool.query(
                 `SELECT * FROM files
                  WHERE user_id = $1
@@ -96,9 +83,7 @@ router.get(
             res.json(result.rows);
 
         } catch (err) {
-
             console.error(err);
-
             res.status(500).json({
                 error: "Server error"
             });
@@ -106,10 +91,65 @@ router.get(
     }
 );
 
+
+// DOWNLOAD FILE BY ID
+router.get(
+    "/download/:id",
+    authMiddleware,
+    async (req, res) => {
+        const { id } = req.params;
+
+        try {
+            // 1. Cari data file di database
+            const result = await pool.query(
+                "SELECT * FROM files WHERE id = $1",
+                [id]
+            );
+
+            if (result.rowCount === 0) {
+                return res.status(404).json({
+                    error: "File not found"
+                });
+            }
+
+            const file = result.rows[0];
+
+            // 2. Validasi kepemilikan file
+            if (file.user_id !== req.user.id) {
+                return res.status(403).json({
+                    error: "You do not have permission to download this file"
+                });
+            }
+
+            // 3. Tentukan path file di storage backend
+            const filePath = path.join(__dirname, "..", file.filepath);
+
+            // 4. Kirim file sebagai download (menggunakan nama asli file tersebut)
+            res.download(filePath, file.filename, (err) => {
+                if (err) {
+                    console.error("Download error:", err);
+                    if (!res.headersSent) {
+                        return res.status(500).json({ 
+                            error: "Could not download the file" 
+                        });
+                    }
+                }
+            });
+
+        } catch (err) {
+            console.error(err);
+            return res.status(500).json({
+                error: "Server error"
+            });
+        }
+    }
+);
+
+
+// DELETE FILE
 router.delete(
     "/:id",
     authMiddleware,
-
     async (req, res) => {
         const { id } = req.params;
 
